@@ -83,24 +83,64 @@ class PosPrediction():
         self.MaxPos = resolution_inp*1.1
 
         # network type
-        self.network = resfcn256(self.resolution_inp, self.resolution_op)
+        # self.network = resfcn256(self.resolution_inp, self.resolution_op)
 
         # net forward
-        self.x = tf.placeholder(tf.float32, shape=[None, self.resolution_inp, self.resolution_inp, 3])  
-        self.x_op = self.network(self.x, is_training = False)
-        self.sess = tf.Session(config=tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True)))
+        # self.x = tf.placeholder(tf.float32, shape=[None, self.resolution_inp, self.resolution_inp, 3])  
+        # self.x_op = self.network(self.x, is_training = False)
+        # self.sess = tf.Session(config=tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True)))
 
     def restore(self, model_path):        
         tf.train.Saver(self.network.vars).restore(self.sess, model_path)
  
     def predict(self, image):
         # [print (n.values()) for n in tf.get_default_graph().get_operations()]
-        from tensorflow.python.framework import graph_io
-        frozen = tf.graph_util.convert_variables_to_constants(self.sess, self.sess.graph_def, ['resfcn256/Conv2d_transpose_16/Sigmoid'])
-        graph_io.write_graph(frozen, '.', 'frozen_graph.pb', as_text=False)
-        pos = self.sess.run(self.x_op, 
-                    feed_dict = {self.x: image[np.newaxis, :,:,:]})
-        pos = np.squeeze(pos)
+        # from tensorflow.python.framework import graph_io
+        # frozen = tf.graph_util.convert_variables_to_constants(self.sess, self.sess.graph_def, ['resfcn256/Conv2d_transpose_16/Sigmoid'])
+        # graph_io.write_graph(frozen, '.', 'frozen_graph.pb', as_text=False)
+        
+        # pos = self.sess.run(self.x_op, 
+        #             feed_dict = {self.x: image[np.newaxis, :,:,:]})
+
+        from openvino.inference_engine import IENetwork, IEPlugin
+
+        model_graph = 'frozen_graph.xml'
+        model_weight = model_graph[:-3] + 'bin'
+
+        net = IENetwork(model = model_graph, 
+                        weights = model_weight)
+
+        iter_inputs = iter(net.inputs)
+        iter_outputs = iter(net.outputs)
+        
+        inputs_num = len(net.inputs)
+
+        input_blob = []
+        for _inputs in iter_inputs:
+            input_blob.append(_inputs)
+
+        output_blob = []
+        for _outputs in iter_outputs:
+            output_blob.append(_outputs)
+
+        _, c, h, w = net.inputs[input_blob[0]].shape
+        image = image.transpose((2, 0, 1)).reshape(1, c, h, w)
+
+        input_l = []
+        for i in input_blob:
+            input_l.append(image)
+
+        inputs = dict()
+        for i in range (inputs_num):
+            inputs[input_blob[i]] = input_l[i]
+
+        plugin = IEPlugin(device = 'CPU')
+        exec_net = plugin.load(network = net)
+
+        pos = exec_net.infer(inputs)[output_blob[0]]
+
+        pos = np.squeeze(pos).transpose((1, 2, 0))
+
         return pos*self.MaxPos
 
     def predict_batch(self, images):
