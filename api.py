@@ -27,11 +27,11 @@ class PRN:
 
         #---- load PRN 
         self.pos_predictor = PosPrediction(self.resolution_inp, self.resolution_op)
-        prn_path = os.path.join(prefix, 'Data/net-data/256_256_resfcn256_weight')
-        if not os.path.isfile(prn_path + '.data-00000-of-00001'):
-            print("please download PRN trained model first.")
-            exit()
-        self.pos_predictor.restore(prn_path)
+        # prn_path = os.path.join(prefix, 'Data/net-data/256_256_resfcn256_weight')
+        # if not os.path.isfile(prn_path + '.data-00000-of-00001'):
+        #     print("please download PRN trained model first.")
+        #     exit()
+        # self.pos_predictor.restore(prn_path)
 
         # uv file
         self.uv_kpt_ind = np.loadtxt(prefix + '/Data/uv-data/uv_kpt_ind.txt').astype(np.int32) # 2 x 68 get kpt
