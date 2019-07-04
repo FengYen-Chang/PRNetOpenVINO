@@ -94,6 +94,10 @@ class PosPrediction():
         tf.train.Saver(self.network.vars).restore(self.sess, model_path)
  
     def predict(self, image):
+        # [print (n.values()) for n in tf.get_default_graph().get_operations()]
+        from tensorflow.python.framework import graph_io
+        frozen = tf.graph_util.convert_variables_to_constants(self.sess, self.sess.graph_def, ['resfcn256/Conv2d_transpose_16/Sigmoid'])
+        graph_io.write_graph(frozen, '.', 'frozen_graph.pb', as_text=False)
         pos = self.sess.run(self.x_op, 
                     feed_dict = {self.x: image[np.newaxis, :,:,:]})
         pos = np.squeeze(pos)
