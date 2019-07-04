@@ -1,5 +1,17 @@
 # This project was fork from [PRNet](https://github.com/YadiraF/PRNet). Since I want to patch it, I mirror it as a new repository.
 
+#### Pipeline for MO
+1. restore the tf model and add below code at lane `96` of `predictor.py` to acquire the `.pb` file.
+```py
+from tensorflow.python.framework import graph_io
+frozen = tf.graph_util.convert_variables_to_constants(self.sess, self.sess.graph_def, ['resfcn256/Conv2d_transpose_16/Sigmoid'])
+graph_io.write_graph(frozen, '.', 'frozen_graph.pb', as_text=False)
+```
+2. Convert IR
+```sh
+python mo.py --input_model=/Users/FengYenChang/Documents/Project/PRNetOpenVINO/frozen_graph.pb -o /Users/FengYenChang/Documents/Project/PRNetOpenVINO/ --input_shape=[1,256,256,3]
+```
+
 # Joint 3D Face Reconstruction and Dense Alignment with Position Map Regression Network
 
 <p align="center"> 
