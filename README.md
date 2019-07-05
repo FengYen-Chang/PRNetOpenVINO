@@ -19,7 +19,7 @@ python mo.py --input_model=/Users/FengYenChang/Documents/Project/PRNetOpenVINO/f
 
 Pipeline for IE
 
-1. Clone the original repository
+1. Clone this repository
 ```sh
 git clone https://github.com/FengYen-Chang/PRNetOpenVINO.git
 cd PRNetOpenVINO
