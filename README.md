@@ -25,7 +25,7 @@ git clone https://github.com/FengYen-Chang/PRNetOpenVINO.git
 cd PRNetOpenVINO
 ```
 
-2. Put the IR file in root
+2. Put the IR file under direction `PRNetOpenVINO`
 3. Run Texture edit
 ```sh
 python demo_texture.py -i image_path_1 -r image_path_2 -o output_path
