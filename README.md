@@ -17,7 +17,7 @@ graph_io.write_graph(frozen, '.', 'frozen_graph.pb', as_text=False)
 python mo.py --input_model=/Users/FengYenChang/Documents/Project/PRNetOpenVINO/frozen_graph.pb -o /Users/FengYenChang/Documents/Project/PRNetOpenVINO/ --input_shape=[1,256,256,3]
 ```
 
-Pipeline for IE
+#### Pipeline for IE
 
 1. Clone this repository
 ```sh
